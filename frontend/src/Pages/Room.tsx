@@ -6,7 +6,7 @@ import UserFeedPlayer from "../Components/UserFeedPlayer";
 const Room: React.FC = () => {
     const {id} = useParams();
 
-    const {socket,user,stream} = useContext(SocketContext);
+    const {socket,user,stream,peers} = useContext(SocketContext);
 
     useEffect(()=>{
         if(user) {
@@ -16,9 +16,17 @@ const Room: React.FC = () => {
     return (
         <div className="">
             Room : {id}
-            <UserFeedPlayer 
-                stream={stream}
-            />
+            <br />
+            Your Feed
+            <UserFeedPlayer stream={stream} />
+            <div>
+                Other user feed
+                {Object.keys(peers).map((peerId)=>(
+                    <>
+                        <UserFeedPlayer key={peerId} stream={peers[peerId].stream} />
+                    </>
+                ))}
+            </div>
         </div>
     );
 }
