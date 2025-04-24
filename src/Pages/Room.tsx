@@ -25,7 +25,7 @@ const Room: React.FC = () => {
                     const peer = peers[peerId];
                     console.log("Rendering peer", peerId, peer); // 👈 Add this
                     return (
-                        <UserFeedPlayer key={peerId} stream={peer.stream} muted={false} />
+                        <UserFeedPlayer key={peerId} stream={peer.stream}  />
                     );
                 })}
             </div>
