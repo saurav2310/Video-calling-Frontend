@@ -8,7 +8,7 @@ import { addPeerAction } from "../Actions/PeerAction";
 
 
 // Web Socket Server
-const WS_SERVER = "http://localhost:5000";
+const WS_SERVER = "video-calling-backend-production.up.railway.app";
 
 // Context for Socket : initialized as null
 export const SocketContext = createContext<any|null>(null);
@@ -49,9 +49,9 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
 
         const userId = UUIDv4();
         const newPeer = new Peer(userId,{
-            host:"localhost",
+            host:"peerjs-production-922d.up.railway.app",
             port:9000,
-            path:'/myapp'
+            path:'/'
         });
 
     
