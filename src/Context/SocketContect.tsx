@@ -1,7 +1,7 @@
 import SocketIoClient from "socket.io-client";
 import { createContext, useEffect, useReducer, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Peer from 'peerjs';
+import Peer, {MediaConnection} from 'peerjs';
 import {v4 as UUIDv4} from "uuid";
 import { peerReducer } from "../Reducers/peerReducer";
 import { addPeerAction } from "../Actions/PeerAction";
@@ -50,7 +50,9 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
         const userId = UUIDv4();
         const newPeer = new Peer(userId,{
             host:"peerjs-production-922d.up.railway.app",
-            path:'/'
+            path:'/',
+            port: 443,
+            secure: true 
         });
 
     
@@ -65,21 +67,29 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
 
     useEffect(()=>{
         if(!user||!stream) return;
-        socket.on('user-joined',({peerId})=>{
-            const call = user.call(peerId,stream);
-            console.log("Calling the new peer");
-            call.on("stream",(remoteStream)=>{
-                dispatch(addPeerAction(peerId,remoteStream));
-            })
-        });
 
-        user.on('call',(call)=>{
-            console.log("receiving call");
+
+        const handleUserJoined = ({ peerId }: { peerId: string }) => {
+            console.log("Calling new peer:", peerId);
+            const call = user.call(peerId, stream);
+            call.on("stream", (remoteStream) => {
+                console.log("Got remote stream from", peerId);
+                dispatch(addPeerAction(peerId, remoteStream));
+            });
+        };
+
+        const handleCall = (call: MediaConnection) => {
+            console.log("Receiving call from", call.peer);
             call.answer(stream);
-            call.on("stream",(remoteStream)=>{
-                dispatch(addPeerAction(call.peer,remoteStream));
-            })
-        });
+            call.on("stream", (remoteStream:MediaStream) => {
+                console.log("Answer received remote stream from", call.peer);
+                dispatch(addPeerAction(call.peer, remoteStream));
+            });
+        };
+        
+        socket.on('user-joined',handleUserJoined);
+
+        user.on('call',handleCall);
 
         socket.emit('ready');
     },[user,stream]);
