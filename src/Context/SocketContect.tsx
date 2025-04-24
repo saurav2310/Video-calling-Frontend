@@ -50,7 +50,6 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
         const userId = UUIDv4();
         const newPeer = new Peer(userId,{
             host:"peerjs-production-922d.up.railway.app",
-            port:9000,
             path:'/'
         });
 
