@@ -21,11 +21,13 @@ const Room: React.FC = () => {
             <UserFeedPlayer stream={stream} />
             <div>
                 Other user feed
-                {Object.keys(peers).map((peerId)=>(
-                    <>
-                        <UserFeedPlayer key={peerId} stream={peers[peerId].stream} />
-                    </>
-                ))}
+                {Object.keys(peers).map((peerId) => {
+                    const peer = peers[peerId];
+                    console.log("Rendering peer", peerId, peer); // 👈 Add this
+                    return (
+                        <UserFeedPlayer key={peerId} stream={peer.stream} muted={false} />
+                    );
+                })}
             </div>
         </div>
     );
