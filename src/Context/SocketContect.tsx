@@ -47,41 +47,48 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
     const fetchTurnCredentials = async ()=>{
         const response = await fetch(`https://${WS_SERVER}/turn-credentials`);
         
+ 
         const data = await response.json();
         return data.iceServers;
     }
 
 
-    useEffect(()=>{
-
-        const userId = UUIDv4();
-        fetchTurnCredentials().then((iceServers)=>{
-
-            const newPeer = new Peer(userId,{
-                host:"peerjs-production-922d.up.railway.app",
-                path:'/',
-                port: 443,
-                secure: true,
-                config: {
-                    iceServers: [
-                        {
-                        urls: "stun:stun.l.google.com:19302"
-                        },
-                        ...iceServers,
-                    ]
-                  }
-            });
-            
-            
-            setUser(newPeer);
-            fetchUserFeed();
-            const enterRoom = ({roomId}:{roomId:string})=>{
-                navigate(`/room/${roomId}`);
+    useEffect(() => {
+        const setup = async () => {
+          const userId = UUIDv4();
+      
+          // 1. First get camera/mic access
+          const userStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          setStream(userStream);
+      
+          // 2. Then fetch TURN credentials
+          const iceServers = await fetchTurnCredentials();
+      
+          // 3. After stream ready, then create Peer
+          const newPeer = new Peer(userId, {
+            host: "peerjs-production-922d.up.railway.app",
+            path: '/',
+            port: 443,
+            secure: true,
+            config: {
+              iceServers: [
+                { urls: "stun:stun.l.google.com:19302" },
+                ...iceServers
+              ]
             }
-            socket.on('room-created',enterRoom);
-            socket.on('get-users',fetchParticipantsList);
-        });
-    },[]);
+          });
+          setUser(newPeer);
+      
+          const enterRoom = ({ roomId }: { roomId: string }) => {
+            navigate(`/room/${roomId}`);
+          };
+          socket.on('room-created', enterRoom);
+          socket.on('get-users', fetchParticipantsList);
+        };
+      
+        setup();
+      }, []);
+      
 
     useEffect(()=>{
         if(!user||!stream) return;
