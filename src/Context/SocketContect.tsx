@@ -45,7 +45,7 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
     }
 
     const fetchTurnCredentials = async ()=>{
-        const response = await fetch('api/turn');
+        const response = await fetch(`https://${WS_SERVER}/turn-credentials`);
         const data = await response.json();
         return data.iceServers;
     }
