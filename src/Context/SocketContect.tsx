@@ -44,25 +44,43 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
         setStream(stream);
     }
 
+    const fetchTurnCredentials = async ()=>{
+        const response = await fetch('api/turn');
+        const data = await response.json();
+        return data.iceServers;
+    }
+
 
     useEffect(()=>{
 
         const userId = UUIDv4();
-        const newPeer = new Peer(userId,{
-            host:"peerjs-production-922d.up.railway.app",
-            path:'/',
-            port: 443,
-            secure: true 
-        });
 
-    
-        setUser(newPeer);
-        fetchUserFeed();
-        const enterRoom = ({roomId}:{roomId:string})=>{
-            navigate(`/room/${roomId}`);
-        }
-        socket.on('room-created',enterRoom);
-        socket.on('get-users',fetchParticipantsList);
+        fetchTurnCredentials().then((iceServers)=>{
+
+            const newPeer = new Peer(userId,{
+                host:"peerjs-production-922d.up.railway.app",
+                path:'/',
+                port: 443,
+                secure: true,
+                config: {
+                    iceServers: [
+                        {
+                        urls: "stun:stun.l.google.com:19302"
+                        },
+                        ...iceServers,
+                    ]
+                  }
+            });
+            
+            
+            setUser(newPeer);
+            fetchUserFeed();
+            const enterRoom = ({roomId}:{roomId:string})=>{
+                navigate(`/room/${roomId}`);
+            }
+            socket.on('room-created',enterRoom);
+            socket.on('get-users',fetchParticipantsList);
+        })
     },[]);
 
     useEffect(()=>{
