@@ -45,7 +45,8 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
     }
 
     const fetchTurnCredentials = async ()=>{
-        const response = await fetch('api/turn');
+        const response = await fetch(`https://${WS_SERVER}/turn-credentials`);
+        
         const data = await response.json();
         return data.iceServers;
     }
@@ -54,7 +55,6 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
     useEffect(()=>{
 
         const userId = UUIDv4();
-
         fetchTurnCredentials().then((iceServers)=>{
 
             const newPeer = new Peer(userId,{
@@ -80,7 +80,7 @@ export const SocketProvider: React.FC<Props> = ({children}) => {
             }
             socket.on('room-created',enterRoom);
             socket.on('get-users',fetchParticipantsList);
-        })
+        });
     },[]);
 
     useEffect(()=>{
